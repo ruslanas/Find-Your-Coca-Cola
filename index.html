@@ -1,0 +1,172 @@
+<html>
+    <head>
+        <title></title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+        <script src="bower_components/threex.dynamictexture/threex.dynamictexture.js"></script>
+        <script>
+
+var renderer, scene, camera, dynTex, cyl;
+var w = 856, h = 475;
+var rotAxis;
+
+function deg2rad(d) {
+    return d * Math.PI / 180;
+}
+
+function init() {
+    dynTex  = new THREEx.DynamicTexture(512, 512);
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera( 75, w / h, 0.1, 10000 );
+
+    renderer = new THREE.WebGLRenderer({
+        alpha: true
+    });
+
+    renderer.setSize(w, h);
+
+    document.getElementById('container').appendChild( renderer.domElement );
+
+    var geometry = new THREE.CylinderGeometry(1, 1, 4, 32, 10, false);
+    var material = new THREE.MeshBasicMaterial( {
+        color: 0xFFFFFF,
+        map: dynTex.texture
+    } );
+
+    dynTex.context.font = '60px Arial';
+    dynTex.drawText('John Smith', 32, 126, 'white');
+
+    cyl = new THREE.Mesh( geometry, material );
+    cyl.rotateY(deg2rad(-90));
+    cyl.rotateZ(deg2rad(30));
+    cyl.rotateX(deg2rad(30));
+
+    cyl.translateY(-2);
+    cyl.translateZ(1);
+
+    scene.add( cyl );
+    scene.add(camera);
+
+    camera.position.z = 5;
+
+    var a = new THREE.Vector3( 1, 0, 0 );
+    var b = new THREE.Vector3( 0, 0, 1 );
+
+    rotAxis = new THREE.Vector3();
+    rotAxis.crossVectors( a, b );
+
+    setInterval(function() {
+        cyl.rotateOnAxis(rotAxis, deg2rad(2));
+    }, 1000 / 60);
+
+    render();
+
+}
+
+function render() {
+    requestAnimationFrame(render);
+    renderer.render(scene, camera);
+}
+
+function changeName() {
+    var name = document.getElementById('name').value;
+    dynTex.clear();
+    dynTex.drawText(name, 32, 126);
+    dynTex.texture.neeedsUpdate = true;
+    return false;
+}
+
+
+
+// YOUTUBE
+
+var tag = document.createElement('script');
+
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+var player;
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        height: h,
+        width: w,
+        videoId: 'EOyGTU2vAfI',
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    // do nothing
+    player.seekTo(35);
+}
+
+var interval;
+var done = false;
+function onPlayerStateChange(event) {
+
+    if (event.data == YT.PlayerState.PLAYING && !done) {
+        interval = setInterval(function() {
+
+
+            // animation
+
+
+        }, 1000 / 30);
+        renderer.domElement.style.display = 'block';
+        done = true;
+    }
+    if (event.data == YT.PlayerState.ENDED) {
+        clearInterval(interval);
+        done = false;
+        renderer.domElement.style.display = 'none';
+    }
+}
+
+
+
+
+
+        </script>
+        <style>
+            body {
+                background-color: #000;
+                color: #FFF;
+                font-family: Arial, sans-serif;
+            }
+            img, #player, canvas {
+                position: absolute
+            }
+            canvas {
+                -webkit-filter: blur(1px);
+                -moz-filter: blur(1px);
+                filter: blur(1px);
+                display: none;
+            }
+            #container {
+                height: 490px;
+            }
+        </style>
+    </head>
+    <body onload="init()">
+        <div id="container">
+            <!--
+            <img id="still"
+                 src="still.png"/>
+             <iframe width="856"
+                     height="475"
+                     src="https://www.youtube.com/embed/EOyGTU2vAfI"
+                     frameborder="0"
+                     allowfullscreen></iframe>
+             -->
+            <div id="player"></div>
+        </div>
+        <form onsubmit="return changeName()">
+            <label>Name:</label>
+            <input type="text" id="name"/>
+            <button>Ok</button>
+        </form>
+    </body>
+</html>
